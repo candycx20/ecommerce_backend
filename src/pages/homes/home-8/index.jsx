@@ -1,5 +1,5 @@
-import Footer7 from "@/components/footers/Footer7";
-import Header8 from "@/components/headers/Header8";
+import Footer1 from "@/components/footers/Footer1";
+import Header1 from "@/components/headers/Header1";
 import Hero from "@/components/homes/home-8/Hero";
 
 import MetaComponent from "@/components/common/MetaComponent";
@@ -11,11 +11,11 @@ export default function HomePage8() {
   return (
     <>
       <MetaComponent meta={metadata} />
-      <Header8 />
+      <Header1 />
       <main>
         <Hero />
       </main>
-      <Footer7 />
+      <Footer1 />
     </>
   );
 }

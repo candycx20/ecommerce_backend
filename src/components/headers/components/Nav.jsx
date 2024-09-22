@@ -54,14 +54,14 @@ export default function Nav() {
     <>
       <li className="navigation__item">
         <a
-          href="#"
+          href="/"
           className={`navigation__link ${
             isActiveParentMenu(homePages) ? "menu-active" : ""
           }`}
         >
           Home
         </a>
-        <div className="box-menu" style={{ width: "800px" }}>
+        {/* <div className="box-menu" style={{ width: "800px" }}>
           <div className="col pe-4">
             <ul className="sub-menu__list list-unstyled">
               {homePages.slice(0, 6).map((elm, i) => (
@@ -130,11 +130,11 @@ export default function Nav() {
             </ul>
           </div>
         </div>
-        {/* <!-- /.box-menu --> */}
-      </li>
+        { <!-- /.box-menu --> */}
+      </li> 
       <li className="navigation__item">
         <a
-          href="#"
+          href="../shop-6"
           className={`navigation__link
            ${isActiveParentMenu(shopList) ? "menu-active" : ""}
            ${isActiveParentMenu(shopDetails) ? "menu-active" : ""}
@@ -143,7 +143,7 @@ export default function Nav() {
         >
           Shop
         </a>
-        <div className="mega-menu">
+        {/* <div className="mega-menu">
           <div className="container d-flex">
             <div className="col pe-4">
               <a href="#" className="sub-menu__title">
@@ -229,10 +229,9 @@ export default function Nav() {
               </div>
             </div>
           </div>
-          {/* <!-- /.container d-flex --> */}
-        </div>
+        </div> */}
       </li>
-      <li className="navigation__item">
+      {/* <li className="navigation__item">
         <a
           href="#"
           className={`navigation__link ${
@@ -255,8 +254,8 @@ export default function Nav() {
             </li>
           ))}
         </ul>
-        {/* <!-- /.box-menu --> */}
-      </li>
+        {
+      </li> */}
       <li className="navigation__item">
         <a
           href="#"
@@ -282,7 +281,7 @@ export default function Nav() {
         </ul>
         {/* <!-- /.box-menu --> */}
       </li>
-      <li className="navigation__item">
+      {/* <li className="navigation__item">
         <Link
           to="/about"
           className={`navigation__link ${
@@ -301,7 +300,7 @@ export default function Nav() {
         >
           Contact
         </Link>
-      </li>
+      </li> */}
     </>
   );
 }

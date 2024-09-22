@@ -117,7 +117,7 @@ function App() {
         <MobileHeader />
         <Routes>
           <Route path="/">
-            <Route index element={<HomePage1 />} />
+            <Route index element={<HomePage8 />} />
             <Route path="home-1" element={<HomePage1 />} />
             <Route path="home-2" element={<HomePage2 />} />
             <Route path="home-3" element={<HomePage3 />} />
@@ -236,8 +236,8 @@ function App() {
         {/* //modals and asides */}
         <LoginFormPopup />
         <QuickView />
-        <NewsLetter />
-        <CookieContainer />
+        {/* <NewsLetter /> */}
+        {/* <CookieContainer /> */}
         <SizeGuide />
         <Delivery />
         <CartDrawer />

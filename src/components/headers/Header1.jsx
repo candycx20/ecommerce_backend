@@ -71,7 +71,7 @@ export default function Header1() {
           {/* <!-- /.navigation --> */}
 
           <div className="header-tools d-flex align-items-center">
-            <SearchPopup />
+            {/* <SearchPopup /> */}
 
             {/* <!-- /.header-tools__item hover-container --> */}
 
@@ -112,7 +112,7 @@ export default function Header1() {
               </span>
             </a>
 
-            <a
+            {/* <a
               className="header-tools__item"
               href="#"
               data-bs-toggle="modal"
@@ -127,7 +127,7 @@ export default function Header1() {
               >
                 <use href="#icon_nav" />
               </svg>
-            </a>
+            </a> */}
           </div>
           {/* <!-- /.header__tools --> */}
         </div>
