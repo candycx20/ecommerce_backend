@@ -24,6 +24,10 @@ function parseJwt(token) {
 
   return JSON.parse(jsonPayload);
 }
+const handleLogout = () => {
+  localStorage.removeItem("token");  // Eliminar token
+  window.location.href = "/login_register";  // Redirigir al login
+};
 
 export default function Nav() {
   const { pathname } = useLocation();
@@ -121,6 +125,14 @@ export default function Nav() {
           <ul className="default-menu list-unstyled">
             {othersMenuItems.map((elm, i) => (
               <li key={i} className="sub-menu__item">
+                {elm.title === "Logout" ? (
+              <button
+                className="menu-link menu-link_us-s"
+                onClick={handleLogout}
+              >
+                {elm.title}
+              </button>
+            ) : (
                 <Link
                   to={elm.href}
                   className={`menu-link menu-link_us-s ${
@@ -129,6 +141,7 @@ export default function Nav() {
                 >
                   {elm.title}
                 </Link>
+                 )}
               </li>
             ))}
           </ul>

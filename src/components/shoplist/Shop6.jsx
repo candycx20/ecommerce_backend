@@ -4,30 +4,104 @@ import ColorSelection from "../common/ColorSelection";
 import { Navigation } from "swiper/modules";
 import Pagination1 from "../common/Pagination1";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContextElement } from "@/context/Context";
+import axios from 'axios';
 
-const itemPerRow = [3, 4, 5];
+const URL = "http://candy21.icu/";
 
 export default function Shop6() {
   const { toggleWishlist, isAddedtoWishlist } = useContextElement();
   const { addProductToCart, isAddedToCartProducts } = useContextElement();
   const [selectedColView, setSelectedColView] = useState(5);
+  const [filtered, setFiltered] = useState([]);
+  const navigate = useNavigate();
 
-  const [filtered, setFiltered] = useState([]); // Estado para los productos
 
-  // Realizar la solicitud al backend para obtener los productos
+  // Función para validar el token
+  const isTokenValid = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+        const now = Date.now() / 1000;
+        return jsonPayload.exp > now; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+
+  const getUsuario = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+          const now = Date.now() / 1000;
+        return jsonPayload.id; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+
   useEffect(() => {
-    // Cambia la URL a la de tu backend
-    fetch("http://candy21.icu/productos/")
+    fetch(`${URL}productos/`)
       .then((response) => response.json())
       .then((data) => {
-        setFiltered(data); // Actualizamos el estado con los datos del backend
+        setFiltered(data);
       })
       .catch((error) => {
         console.error("Error al obtener los productos:", error);
       });
   }, []);
+
+  // Función para manejar agregar al carrito
+  const handleAddToCart = (productId) => {
+    if (!isTokenValid()) {
+      navigate("/login_register#register-tab");
+    } else {
+      const userId = getUsuario();
+      const data = {
+        id_producto: productId,
+        cantidad: 1, 
+        id_usuario: userId
+      };
+      axios.post(`${URL}carritoCompras/`, data)
+        .then((response) => {
+          addProductToCart(productId);
+        })
+        .catch((error) => {
+          console.error('Error al agregar producto al carrito:', error);
+        });
+    }
+  };
 
   return (
     <>
@@ -74,7 +148,7 @@ export default function Shop6() {
             <div key={i} className="product-card-wrapper">
               <div className="product-card mb-3 mb-md-4 mb-xxl-5">
                 <div className="pc__img-wrapper">
-                  <Swiper
+                  {/*<Swiper
                     className="shop-list-swiper  swiper-container background-img js-swiper-slider"
                     slidesPerView={1}
                     modules={[Navigation]}
@@ -82,7 +156,7 @@ export default function Shop6() {
                       prevEl: ".prev" + i,
                       nextEl: ".next" + i,
                     }}
-                  >
+                  >*/}
                     {/* IMAGENES DE LOS PRODUCTOS */}
                     {/* {[elm.imgSrc, elm.imgSrc2].map((elm2, i) => (
                       <SwiperSlide key={i} className="swiper-slide">
@@ -122,14 +196,21 @@ export default function Shop6() {
                       >
                         <use href="#icon_next_sm" />
                       </svg>
-                    </span> */}
-                  </Swiper>
+                    </span> 
+                  </Swiper>*/}
+                  
                   <button
                     className="pc__atc btn anim_appear-bottom btn position-absolute border-0 text-uppercase fw-medium js-add-cart js-open-aside"
-                    onClick={() => addProductToCart(elm.id)}
-                    title="Add to Cart"
+                    onClick={() => handleAddToCart(elm.id)}
+                    title={
+                      isAddedToCartProducts(elm.id)
+                        ? "Already Added"
+                        : "Add to Cart"
+                    }
                   >
-                    Add To Cart
+                    {isAddedToCartProducts(elm.id)
+                      ? "Already Added"
+                      : "Add To Cart"}
                   </button>
                 </div>
 

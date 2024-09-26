@@ -1,10 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 
 import { useContextElement } from "@/context/Context";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
+
+const URL = "http://candy21.icu/";
 
 export default function CartDrawer() {
-  const { cartProducts, setCartProducts, totalPrice } = useContextElement();
+  const { cartProducts, setCartProducts } = useContextElement();
+  const [totalPrice, setTotalPrice] = useState(0);
   const { pathname } = useLocation();
   const closeCart = () => {
     document
@@ -12,6 +16,62 @@ export default function CartDrawer() {
       .classList.remove("page-overlay_visible");
     document.getElementById("cartDrawer").classList.remove("aside_visible");
   };
+
+
+  const isTokenValid = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+        const now = Date.now() / 1000;
+        return jsonPayload.exp > now; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+
+  const getUsuario = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+          const now = Date.now() / 1000;
+        return jsonPayload.id; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+  
+  const userId = getUsuario();
+
   const setQuantity = (id, quantity) => {
     if (quantity >= 1) {
       const item = cartProducts.filter((elm) => elm.id == id)[0];
@@ -25,9 +85,35 @@ export default function CartDrawer() {
   const removeItem = (id) => {
     setCartProducts((pre) => [...pre.filter((elm) => elm.id != id)]);
   };
+
   useEffect(() => {
-    closeCart();
-  }, [pathname]);
+    if (isTokenValid()) {
+      const fetchCartProducts = async () => {
+        try {
+          const response = await axios.get(`${URL}carritoCompras/`, {
+            params: {
+              id_usuario: userId  // Asegúrate de pasar el id del usuario
+            }
+          });
+          setCartProducts(response.data);
+    
+          // Calcula el precio total del carrito
+          const total = response.data.reduce((acc, producto) => acc + (producto.precio * producto.cantidad), 0);
+          setTotalPrice(total);
+    
+        } catch (error) {
+          console.error('Error al obtener los productos del carrito:', error);
+        }
+      }
+  
+      fetchCartProducts();
+      closeCart();
+    }else {
+      setCartProducts([]);
+      setTotalPrice(0);
+    }
+  }, [userId]);
+  
 
   return (
     <>
@@ -54,7 +140,7 @@ export default function CartDrawer() {
               <React.Fragment key={i}>
                 <div className="cart-drawer-item d-flex position-relative">
                   <div className="position-relative">
-                    <img
+                    {/*<img
                       loading="lazy"
                       className="cart-drawer-item__img"
                       width={330}
@@ -62,17 +148,17 @@ export default function CartDrawer() {
                       style={{ height: "fit-content" }}
                       src={elm.imgSrc}
                       alt="image"
-                    />
+                    />*/}
                   </div>
                   <div className="cart-drawer-item__info flex-grow-1">
                     <h6 className="cart-drawer-item__title fw-normal">
-                      {elm.title}
+                      {elm.producto.nombre}
                     </h6>
                     <p className="cart-drawer-item__option text-secondary">
-                      Color: Yellow
+                      Marca: {elm.producto.marca.nombre}
                     </p>
                     <p className="cart-drawer-item__option text-secondary">
-                      Size: L
+                      Talla: {elm.producto.talla.descripcion}
                     </p>
                     <div className="d-flex align-items-center justify-content-between mt-1">
                       <div className="qty-control position-relative">
@@ -82,20 +168,20 @@ export default function CartDrawer() {
                           onChange={(e) =>
                             setQuantity(elm.id, e.target.value / 1)
                           }
-                          value={elm.quantity}
+                          value={elm.cantidad}
                           min="1"
                           className="qty-control__number border-0 text-center"
                         />
                         <div
                           onClick={() => {
-                            setQuantity(elm.id, elm.quantity - 1);
+                            setQuantity(elm.id, elm.cantidad - 1);
                           }}
                           className="qty-control__reduce text-start"
                         >
                           -
                         </div>
                         <div
-                          onClick={() => setQuantity(elm.id, elm.quantity + 1)}
+                          onClick={() => setQuantity(elm.id, elm.cantidad + 1)}
                           className="qty-control__increase text-end"
                         >
                           +
@@ -103,7 +189,7 @@ export default function CartDrawer() {
                       </div>
 
                       <span className="cart-drawer-item__price money price">
-                        ${elm.price * elm.quantity}
+                        ${elm.producto.precio * elm.cantidad}
                       </span>
                     </div>
                   </div>
@@ -148,12 +234,12 @@ export default function CartDrawer() {
               </Link>
             </>
           ) : (
-            <Link to="/shop-1" className="btn btn-light mt-3 d-block">
+            <Link to="/shop-6" className="btn btn-light mt-3 d-block">
               Explore shop
             </Link>
           )}
         </div>
-        {/* <!-- /.aside-content --> */}
+        {/* <!-- /.aside-content --> */}  
       </div>
       <div
         id="cartDrawerOverlay"

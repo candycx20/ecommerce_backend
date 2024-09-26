@@ -7,12 +7,22 @@ const countries = [
 ];
 import { useContextElement } from "@/context/Context";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 export default function Checkout() {
   const { cartProducts, totalPrice } = useContextElement();
   const [selectedRegion, setSelectedRegion] = useState("");
   const [idDDActive, setIdDDActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const navigate = useNavigate();
+
+  const proceedToCheckout = () => {
+    // Si hay productos en el carrito, redirige al checkout
+    if (cartProducts.length > 0) {
+      navigate('/shop_order_complete');
+    }
+  };
+
   return (
     <form onSubmit={(e) => e.preventDefault()}>
       <div className="checkout-form">
@@ -355,7 +365,9 @@ export default function Checkout() {
                 .
               </div>
             </div>
-            <button className="btn btn-primary btn-checkout">
+            <button className="btn btn-primary btn-checkout"
+            onClick={proceedToCheckout}
+             >
               PLACE ORDER
             </button>
           </div>
