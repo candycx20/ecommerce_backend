@@ -260,16 +260,16 @@ export const slidesData2 = [
 export const slidesData3 = [
   {
     id: 1,
-    imageSrc: "/assets/images/home/demo8/slider1.jpg",
-    season: "Summer 2023",
+    imageSrc: "/assets/images/landpage1c.png",
+    season: "Summer 2024",
     objectPosition: "50% center",
     title: "New Arrival Men’s",
     subtitle: "Collection",
-  },
+  },/* 
   {
     id: 2,
     imageSrc: "/assets/images/home/demo8/slider2.jpg",
-    season: "Summer 2023",
+    season: "Summer 2024",
     objectPosition: "70% center",
     title: "New Arrival Women’s",
     subtitle: "Collection",
@@ -277,11 +277,11 @@ export const slidesData3 = [
   {
     id: 3,
     imageSrc: "/assets/images/home/demo8/slider3.jpg",
-    season: "Summer 2023",
+    season: "Summer 2024",
     objectPosition: "50% center",
     title: "New Arrival Kid’s",
     subtitle: "Collection",
-  },
+  }, */
 ];
 export const slidesData4 = [
   {

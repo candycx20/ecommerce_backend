@@ -15,7 +15,7 @@ export default function Footer1() {
       <div className="footer-middle container">
         <div className="row row-cols-lg-5 row-cols-2">
           <div className="footer-column footer-store-info col-12 mb-4 mb-lg-0">
-            <div className="logo">
+            {/* <div className="logo">
               <Link to="/">
                 <img
                   src="/assets/images/logo.png"
@@ -25,7 +25,7 @@ export default function Footer1() {
                   className="logo__image d-block"
                 />
               </Link>
-            </div>
+            </div> */}
             {/* <!-- /.logo --> */}
 
             <p className="m-0">

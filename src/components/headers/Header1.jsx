@@ -83,7 +83,7 @@ export default function Header1() {
       <div className="container">
         <div className="header-desk header-desk_type_1">
           <div className="logo">
-            <Link to="/">
+            {/* <Link to="/">
               <img
                 src="/assets/images/logo.png"
                 width={112}
@@ -91,7 +91,7 @@ export default function Header1() {
                 alt="Uomo"
                 className="logo__image d-block"
               />
-            </Link>
+            </Link> */}
           </div>
           {/* <!-- /.logo --> */}
 
@@ -116,7 +116,7 @@ export default function Header1() {
             </div>
             )}
 
-            {tokenValid && (
+            {/* {tokenValid && (
             <Link className="header-tools__item" to="/account_wishlist">
               <svg
                 width="20"
@@ -128,7 +128,7 @@ export default function Header1() {
                 <use href="#icon_heart" />
               </svg>
             </Link>
-            )}
+            )} */}
 
             <a
               onClick={() => openCart()}

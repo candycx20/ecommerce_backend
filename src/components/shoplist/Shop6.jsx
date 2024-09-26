@@ -114,7 +114,7 @@ export default function Shop6() {
             >
               <img
                 loading="lazy"
-                src="/assets/images/shop/shop_banner6.jpg"
+                src="/assets/images/landpage2c.png"
                 width="1903"
                 height="420"
                 alt="Pattern"

@@ -58,7 +58,7 @@ export default function LoginRegister() {
                 Login
               </a>
             </li>
-            <li className="nav-item" role="presentation">
+            {/* <li className="nav-item" role="presentation">
               <a
                 className="nav-link nav-link_underscore"
                 id="register-tab"
@@ -70,7 +70,7 @@ export default function LoginRegister() {
               >
                 Register
               </a>
-            </li>
+            </li> */}
           </ul>
           <div className="tab-content pt-2" id="login_register_tab_content">
             <div
