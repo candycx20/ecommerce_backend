@@ -152,13 +152,13 @@ export default function CartDrawer() {
                   </div>
                   <div className="cart-drawer-item__info flex-grow-1">
                     <h6 className="cart-drawer-item__title fw-normal">
-                      {elm.producto.nombre}
+                      {elm?.producto?.nombre || "Producto sin nombre"}
                     </h6>
                     <p className="cart-drawer-item__option text-secondary">
-                      Marca: {elm.producto.marca.nombre}
+                      {elm?.producto?.nombre || "Producto sin nombre"}
                     </p>
                     <p className="cart-drawer-item__option text-secondary">
-                      Talla: {elm.producto.talla.descripcion}
+                      Talla: {elm?.producto?.talla?.descripcion || "Talla no disponible"}
                     </p>
                     <div className="d-flex align-items-center justify-content-between mt-1">
                       <div className="qty-control position-relative">
@@ -168,7 +168,7 @@ export default function CartDrawer() {
                           onChange={(e) =>
                             setQuantity(elm.id, e.target.value / 1)
                           }
-                          value={elm.cantidad}
+                          value={elm?.cantidad || 0}
                           min="1"
                           className="qty-control__number border-0 text-center"
                         />
@@ -189,7 +189,7 @@ export default function CartDrawer() {
                       </div>
 
                       <span className="cart-drawer-item__price money price">
-                        ${elm.producto.precio * elm.cantidad}
+                        ${elm?.producto?.precio ? (elm.producto.precio * elm.cantidad).toFixed(2) : "Precio no disponible"}
                       </span>
                     </div>
                   </div>

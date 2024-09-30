@@ -30,6 +30,7 @@ export default function LoginRegister() {
           localStorage.setItem('token', result.token);
           setLoginSuccessful(true);
           navigate('/shop-6');  // Redirigir a la página de Shop después de iniciar sesión
+          window.location.reload();
         }
       })
       .catch((error) => {
