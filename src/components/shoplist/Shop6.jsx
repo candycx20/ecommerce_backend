@@ -13,9 +13,9 @@ export default function Shop6() {
     isAddedToCartProducts
   } = useContextElement(); 
 
-  const [selectedColView, setSelectedColView] = useState(5); // Control de las columnas de la vista de productos
-  const [filtered, setFiltered] = useState([]); // Productos de la tienda
-  const [cartProductIds, setCartProductIds] = useState([]); // IDs de productos que están en el carrito
+  const [selectedColView, setSelectedColView] = useState(5); 
+  const [filtered, setFiltered] = useState([]);
+  const [cartProductIds, setCartProductIds] = useState([]); 
   const [loadingCart, setLoadingCart] = useState(true); // Estado para verificar si el carrito está cargando
   const navigate = useNavigate();
 
@@ -36,13 +36,13 @@ export default function Shop6() {
           )
         );
         const now = Date.now() / 1000;
-        return jsonPayload.exp > now; // Verifica si el token ha expirado
+        return jsonPayload.exp > now; 
       } catch (error) {
         console.error("Error al analizar el token:", error);
         return false;
       }
     }
-    return false; // Si no hay token, devolver false
+    return false; 
   };
 
   // Función para obtener el ID del usuario desde el token almacenado
@@ -61,7 +61,7 @@ export default function Shop6() {
               .join("")
           )
         );
-        return jsonPayload.id; // Devuelve el ID del usuario extraído del token
+        return jsonPayload.id; 
       } catch (error) {
         console.error("Error al analizar el token:", error);
         return false;
@@ -72,11 +72,10 @@ export default function Shop6() {
 
   // Al cargar la página obtenemos los productos de la tienda y del carrito del usuario
   useEffect(() => {
-    // Obtener productos de la tienda
     fetch(`${URL}productos/`)
       .then((response) => response.json())
       .then((data) => {
-        setFiltered(data); // Guardar los productos obtenidos en el estado
+        setFiltered(data); 
       })
       .catch((error) => {
         console.error("Error al obtener los productos de la tienda:", error);
@@ -85,20 +84,16 @@ export default function Shop6() {
     // Obtener productos del carrito del backend
     const fetchCartProducts = async () => {
       if (isTokenValid()) {
-        const userId = getUsuario(); // Obtén el ID del usuario
+        const userId = getUsuario();
         try {
           const response = await axios.get(`${URL}carritoCompras/`, {
-            params: { id_usuario: userId }, // Pasa el ID del usuario como parámetro
+            params: { id_usuario: userId },
           });
           const cartIds = response.data.map((item) => item.id_producto); // Obtiene los IDs de los productos en el carrito
           setCartProductIds(cartIds); // Guardar los IDs de los productos en el carrito
         } catch (error) {
           console.error("Error al obtener los productos del carrito:", error);
-        } finally {
-          setLoadingCart(false); // Marcar que la carga del carrito ha terminado
         }
-      } else {
-        setLoadingCart(false); // Si no hay token válido, también marcar que la carga ha terminado
       }
     };
 
@@ -110,7 +105,11 @@ export default function Shop6() {
     if (!isTokenValid()) {
       navigate("/login_register#register-tab"); // Si no hay token válido, redirigir a la página de login
     } else {
-      const userId = getUsuario(); // Obtener el ID del usuario
+      if (isProductInCart(productId)) {
+        // Si el producto ya está en el carrito, no hacemos nada
+        return;
+      }
+      const userId = getUsuario();
       const data = {
         id_producto: productId,
         cantidad: 1,
@@ -131,11 +130,6 @@ export default function Shop6() {
   const isProductInCart = (productId) => {
     return cartProductIds.includes(productId); // Retorna true si el ID del producto está en el carrito
   };
-
-  // Mostrar un mensaje de "Loading..." mientras se cargan los productos del carrito
-  if (loadingCart) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <>
