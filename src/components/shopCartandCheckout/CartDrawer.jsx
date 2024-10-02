@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-
 import { useContextElement } from "@/context/Context";
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
@@ -16,7 +15,6 @@ export default function CartDrawer() {
       .classList.remove("page-overlay_visible");
     document.getElementById("cartDrawer").classList.remove("aside_visible");
   };
-
 
   const isTokenValid = () => {
     const token = localStorage.getItem("token");
@@ -42,7 +40,6 @@ export default function CartDrawer() {
     }
     return false; 
   };
-
 
   const getUsuario = () => {
     const token = localStorage.getItem("token");
@@ -72,16 +69,49 @@ export default function CartDrawer() {
   
   const userId = getUsuario();
 
-  const setQuantity = (id, quantity) => {
+
+  const calculateTotal = (products) => {
+    const total = products.reduce((acc, producto) => acc + (producto.producto.precio * producto.cantidad), 0);
+    setTotalPrice(total.toFixed(2));
+  };
+
+
+  const setQuantity = async (id, quantity) => {
     if (quantity >= 1) {
-      const item = cartProducts.filter((elm) => elm.id == id)[0];
-      const items = [...cartProducts];
-      const itemIndex = items.indexOf(item);
-      item.quantity = quantity;
-      items[itemIndex] = item;
-      setCartProducts(items);
+        const updatedProducts = cartProducts.map((product) => {
+            if (product.id === id) {
+                return { ...product, cantidad: quantity }; 
+            }
+            return product;
+        });
+
+        setCartProducts(updatedProducts);
+        calculateTotal(updatedProducts)
+
+        try {
+            const data = { cantidad: quantity};
+            await axios.put(`${URL}carritoCompras/${id}`, data); 
+            
+        } catch (error) {
+            console.error("Error al actualizar la cantidad del producto:", error);
+        }
+    }
+};
+
+  const incrementQuantity = (id) => {
+    const product = cartProducts.find((elm) => elm.id === id);
+    if (product) {
+      setQuantity(id, product.cantidad + 1); // Incrementar la cantidad
     }
   };
+
+  const decrementQuantity = (id) => {
+    const product = cartProducts.find((elm) => elm.id === id);
+    if (product && product.cantidad > 1) {
+      setQuantity(id, product.cantidad - 1); // Decrementar la cantidad, siempre que sea mayor que 1
+    }
+  };
+
   const removeItem = (id) => {
     setCartProducts((pre) => [...pre.filter((elm) => elm.id != id)]);
   };
@@ -92,14 +122,12 @@ export default function CartDrawer() {
         try {
           const response = await axios.get(`${URL}carritoCompras/`, {
             params: {
-              id_usuario: userId  // Asegúrate de pasar el id del usuario
+              id_usuario: userId
             }
           });
+          
           setCartProducts(response.data);
-    
-          // Calcula el precio total del carrito
-          const total = response.data.reduce((acc, producto) => acc + (producto.precio * producto.cantidad), 0);
-          setTotalPrice(total);
+          calculateTotal(response.data)
     
         } catch (error) {
           console.error('Error al obtener los productos del carrito:', error);
@@ -173,15 +201,13 @@ export default function CartDrawer() {
                           className="qty-control__number border-0 text-center"
                         />
                         <div
-                          onClick={() => {
-                            setQuantity(elm.id, elm.cantidad - 1);
-                          }}
+                          onClick={() => decrementQuantity(elm.id)} // Restar cantidad
                           className="qty-control__reduce text-start"
                         >
                           -
                         </div>
                         <div
-                          onClick={() => setQuantity(elm.id, elm.cantidad + 1)}
+                          onClick={() => incrementQuantity(elm.id)} // Sumar cantidad
                           className="qty-control__increase text-end"
                         >
                           +

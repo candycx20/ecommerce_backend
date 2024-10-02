@@ -17,7 +17,6 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   const proceedToCheckout = () => {
-    // Si hay productos en el carrito, redirige al checkout
     if (cartProducts.length > 0) {
       navigate('/shop_order_complete');
     }
