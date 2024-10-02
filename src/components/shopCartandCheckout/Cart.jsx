@@ -53,7 +53,6 @@ export default function Cart() {
       });
       setCartProducts(response.data);
       calculateTotal(response.data)
-      setTotalPrice(total);
     } catch (error) {
       console.error("Error al obtener los productos del carrito:", error);
     }

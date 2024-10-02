@@ -101,20 +101,26 @@ export default function CartDrawer() {
   const incrementQuantity = (id) => {
     const product = cartProducts.find((elm) => elm.id === id);
     if (product) {
-      setQuantity(id, product.cantidad + 1); // Incrementar la cantidad
+      setQuantity(id, product.cantidad + 1);
     }
   };
 
   const decrementQuantity = (id) => {
     const product = cartProducts.find((elm) => elm.id === id);
     if (product && product.cantidad > 1) {
-      setQuantity(id, product.cantidad - 1); // Decrementar la cantidad, siempre que sea mayor que 1
+      setQuantity(id, product.cantidad - 1);
     }
   };
 
-  const removeItem = (id) => {
+  const removeItem = async (id) => {
     setCartProducts((pre) => [...pre.filter((elm) => elm.id != id)]);
-  };
+    try {
+      const data = { estado: 0};
+      await axios.put(`${URL}carritoCompras/${id}`, data); 
+    } catch (error) {
+        console.error("Error al eliminar el producto:", error);
+    }
+    };
 
   useEffect(() => {
     if (isTokenValid()) {
@@ -125,7 +131,7 @@ export default function CartDrawer() {
               id_usuario: userId
             }
           });
-          
+
           setCartProducts(response.data);
           calculateTotal(response.data)
     
