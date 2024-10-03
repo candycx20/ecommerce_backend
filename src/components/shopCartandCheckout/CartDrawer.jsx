@@ -120,7 +120,7 @@ export default function CartDrawer() {
     } catch (error) {
         console.error("Error al eliminar el producto:", error);
     }
-    };
+  };
 
   useEffect(() => {
     if (isTokenValid()) {
