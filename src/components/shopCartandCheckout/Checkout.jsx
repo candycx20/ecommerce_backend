@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-const URL = "http://candy21.icu/";
+const URL = "http://18.218.13.130:2003/";
 
 const countries = [
   "Australia",

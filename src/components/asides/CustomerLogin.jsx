@@ -11,7 +11,7 @@ export default function CustomerLogin() {
     e.preventDefault();
     const data = {email: email, contrasenia: contrasenia};
 
-    fetch('http://candy21.icu/:2003/usuarios/login',{
+    fetch('http://18.218.13.130:2003/usuarios/login',{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

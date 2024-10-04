@@ -2,7 +2,7 @@ import { useContextElement } from "@/context/Context";
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-const URL = "http://candy21.icu/";
+const URL = "http://18.218.13.130:2003/";
 
 export default function OrderCompleted() {
   const { cartProducts, setCartProducts } = useContextElement();

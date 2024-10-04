@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Home from "../homes/home-8/Hero";
 
-const URL = "http://candy21.icu/";
+const URL = "http://18.218.13.130:2003/";
 
 export default function LoginRegister() {
   const [contrasenia, setContrasenia] = useState('');
