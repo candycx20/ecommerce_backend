@@ -13,10 +13,9 @@ export default function Shop6() {
     isAddedToCartProducts
   } = useContextElement(); 
 
-  const [selectedColView, setSelectedColView] = useState(5); 
+  const [selectedColView] = useState(5); 
   const [filtered, setFiltered] = useState([]);
   const [cartProductIds, setCartProductIds] = useState([]); 
-  const [loadingCart, setLoadingCart] = useState(true); // Estado para verificar si el carrito está cargando
   const navigate = useNavigate();
 
   // Función para validar el token de autenticación
@@ -90,20 +89,20 @@ export default function Shop6() {
             params: { id_usuario: userId },
           });
           const cartIds = response.data.map((item) => item.id_producto); // Obtiene los IDs de los productos en el carrito
-          setCartProductIds(cartIds); // Guardar los IDs de los productos en el carrito
+          setCartProductIds(cartIds); 
         } catch (error) {
           console.error("Error al obtener los productos del carrito:", error);
         }
       }
     };
 
-    fetchCartProducts(); // Ejecuta la función para cargar productos del carrito
+    fetchCartProducts();
   }, []);
 
   // Función para manejar el evento de agregar productos al carrito
   const handleAddToCart = (productId) => {
     if (!isTokenValid()) {
-      navigate("/login_register#register-tab"); // Si no hay token válido, redirigir a la página de login
+      navigate("/login_register#register-tab");
     } else {
       if (isProductInCart(productId)) {
         // Si el producto ya está en el carrito, no hacemos nada
@@ -117,8 +116,8 @@ export default function Shop6() {
       };
       axios.post(`${URL}carritoCompras/`, data)
         .then(() => {
-          addProductToCart(productId); // Actualiza el estado de productos en el carrito
-          setCartProductIds((prevIds) => [...prevIds, productId]); // Añade el ID del producto al carrito en el estado
+          addProductToCart(productId);
+          setCartProductIds((prevIds) => [...prevIds, productId]); 
         })
         .catch((error) => {
           console.error('Error al agregar el producto al carrito:', error);
@@ -128,7 +127,7 @@ export default function Shop6() {
 
   // Función para verificar si el producto ya está en el carrito
   const isProductInCart = (productId) => {
-    return cartProductIds.includes(productId); // Retorna true si el ID del producto está en el carrito
+    return cartProductIds.includes(productId); 
   };
 
   return (

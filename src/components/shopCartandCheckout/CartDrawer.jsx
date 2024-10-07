@@ -122,9 +122,7 @@ export default function CartDrawer() {
     }
   };
 
-  useEffect(() => {
-    if (isTokenValid()) {
-      const fetchCartProducts = async () => {
+  const fetchCartProducts = async () => {
         try {
           const response = await axios.get(`${URL}carritoCompras/`, {
             params: {
@@ -139,14 +137,16 @@ export default function CartDrawer() {
           console.error('Error al obtener los productos del carrito:', error);
         }
       }
-  
+
+  useEffect(() => {
+    if (isTokenValid()) {
       fetchCartProducts();
       closeCart();
     }else {
       setCartProducts([]);
       setTotalPrice(0);
     }
-  }, [userId]);
+  }, [cartProducts.length]);
   
 
   return (
