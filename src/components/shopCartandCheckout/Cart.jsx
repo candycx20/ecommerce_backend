@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-const URL = "http://candy21.icu/";
+const URL = "http://18.218.13.130:2003/";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -88,6 +88,7 @@ export default function Cart() {
     }else {
       setCartProducts([]);
       setTotalPrice(0);
+      navigate('/');
     }
   }, []);
 

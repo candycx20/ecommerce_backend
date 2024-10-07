@@ -37,6 +37,31 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [isFormValid, setIsFormValid] = useState(false);
 
+  const isTokenValid = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+        const now = Date.now() / 1000;
+        return jsonPayload.exp > now; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
   const getUsuario = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -117,8 +142,14 @@ export default function Checkout() {
 
   // Efecto para validar el formulario en tiempo real y habilitar o deshabilitar el botón PLACE ORDER
   useEffect(() => {
+    if (isTokenValid()) {
     fetchCartProducts();
     setIsFormValid(validateForm());
+  }else{
+    setCartProducts([]); 
+    setTotalPrice(0); 
+    navigate('/');
+  }
   }, [formValues, selectedRegion]);
 
   const proceedToCheckout = () => {
