@@ -19,7 +19,13 @@ export default function Checkout() {
   const [selectedRegion, setSelectedRegion] = useState("");
   const [idDDActive, setIdDDActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [user, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: ''
+  });
+  
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
@@ -94,6 +100,29 @@ export default function Checkout() {
     setTotalPrice(total.toFixed(2));
   };
 
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${URL}usuarios/${userId}`);
+      const { nombre, apellido, telefono, email } = response.data;
+      
+      // Actualiza el estado 'user'
+      setUser({ firstName: nombre, lastName: apellido, phone: telefono, email });
+  
+      // Actualiza también los 'formValues' con los datos del usuario
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        firstName: nombre,
+        lastName: apellido,
+        phone: telefono,
+        email: email,
+      }));
+      
+    } catch (error) {
+      console.error("Error al obtener los datos del usuario:", error);
+    }
+  };
+  
+  
 
   const fetchCartProducts = async () => {
     try {
@@ -144,6 +173,7 @@ export default function Checkout() {
   useEffect(() => {
     if (isTokenValid()) {
     fetchCartProducts();
+    fetchUser();
     setIsFormValid(validateForm());
   }else{
     setCartProducts([]); 
@@ -194,6 +224,7 @@ export default function Checkout() {
             const pedidoId = response.data.id; 
             await createDetallePedido(pedidoId);
             localStorage.setItem("orderId", pedidoId);
+            console.log(localStorage.setItem("orderId"))
             updateCart();
         }
     } catch (error) {
@@ -254,7 +285,7 @@ const updateCart = async () => {
                   placeholder="First Name"
                   value={formValues.firstName}
                   onChange={handleInputChange}
-                  onBlur={handleFieldBlur}  // Marca como "tocado"
+                  onBlur={handleFieldBlur}
                 />
                 <label htmlFor="firstName">First Name</label>
                 {touchedFields.firstName && formErrors.firstName && (
