@@ -19,6 +19,7 @@ export default function Checkout() {
   const [selectedRegion, setSelectedRegion] = useState("");
   const [idDDActive, setIdDDActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -269,6 +270,9 @@ const updateCart = async () => {
   }
 };
 
+const handlePaymentMethodChange = (e) => {
+  setPaymentMethod(e.target.value);
+};
 
   return (
     <form onSubmit={(e) => e.preventDefault()}>
@@ -531,35 +535,84 @@ const updateCart = async () => {
               </table>
             </div>
             <div className="checkout__payment-methods">
-              <div className="form-check">
-                <input
-                  className="form-check-input form-check-input_fill"
-                  type="radio"
-                  name="checkout_payment_method"
-                  id="checkout_payment_method_3"
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="checkout_payment_method_3"
-                >
-                  Cash on delivery
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input form-check-input_fill"
-                  type="radio"
-                  name="checkout_payment_method"
-                  id="checkout_payment_method_4"
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="checkout_payment_method_4"
-                >
-                  Paypal
-                </label>
-              </div>
+            {/* Método de pago: Contra entrega */}
+            <div className="form-check">
+              <input
+                className="form-check-input form-check-input_fill"
+                type="radio"
+                name="checkout_payment_method"
+                id="checkout_payment_method_3"
+                value="cash"
+                onChange={handlePaymentMethodChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="checkout_payment_method_3"
+              >
+                Cash on delivery
+              </label>
             </div>
+
+            {/* Método de pago: Tarjeta */}
+            <div className="form-check">
+              <input
+                className="form-check-input form-check-input_fill"
+                type="radio"
+                name="checkout_payment_method"
+                id="checkout_payment_method_4"
+                value="card"
+                onChange={handlePaymentMethodChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="checkout_payment_method_4"
+              >
+                Tarjeta
+              </label>
+            </div>
+
+            {/* Campos adicionales que se muestran solo si se selecciona "Tarjeta" */}
+            {paymentMethod === 'card' && (
+              <div className="card-details">
+                <div className="form-group">
+                  <label htmlFor="cardNumber">Número de tarjeta</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="cardNumber"
+                    placeholder="Introduce el número de la tarjeta"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="cardName">Nombre en la tarjeta</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="cardName"
+                    placeholder="Nombre del titular"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="expiryDate">Fecha de expiración</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="expiryDate"
+                    placeholder="MM/AA"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="cvv">CVV</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="cvv"
+                    placeholder="CVV"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
             <div>
               <button className="btn btn-primary btn-checkout mb-2"
                 onClick={shoppingBag}>
