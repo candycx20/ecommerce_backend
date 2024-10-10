@@ -117,6 +117,7 @@ export default function CartDrawer() {
     try {
       const data = { estado: 0};
       await axios.put(`${URL}carritoCompras/${id}`, data); 
+      window.location.reload();
     } catch (error) {
         console.error("Error al eliminar el producto:", error);
     }
