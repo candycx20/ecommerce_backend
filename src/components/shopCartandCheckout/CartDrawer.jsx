@@ -1,10 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-
 import { useContextElement } from "@/context/Context";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
+
+const URL = "http://18.218.13.130:2003/";
 
 export default function CartDrawer() {
-  const { cartProducts, setCartProducts, totalPrice } = useContextElement();
+  const { cartProducts, setCartProducts } = useContextElement();
+  const [totalPrice, setTotalPrice] = useState(0);
   const { pathname } = useLocation();
   const closeCart = () => {
     document
@@ -12,22 +15,139 @@ export default function CartDrawer() {
       .classList.remove("page-overlay_visible");
     document.getElementById("cartDrawer").classList.remove("aside_visible");
   };
-  const setQuantity = (id, quantity) => {
+
+  const isTokenValid = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+        const now = Date.now() / 1000;
+        return jsonPayload.exp > now; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+  const getUsuario = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+          const now = Date.now() / 1000;
+        return jsonPayload.id; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+  
+  const userId = getUsuario();
+
+
+  const calculateTotal = (products) => {
+    const total = products.reduce((acc, producto) => acc + (producto.producto.precio * producto.cantidad), 0);
+    setTotalPrice(total.toFixed(2));
+  };
+
+
+  const setQuantity = async (id, quantity) => {
     if (quantity >= 1) {
-      const item = cartProducts.filter((elm) => elm.id == id)[0];
-      const items = [...cartProducts];
-      const itemIndex = items.indexOf(item);
-      item.quantity = quantity;
-      items[itemIndex] = item;
-      setCartProducts(items);
+        const updatedProducts = cartProducts.map((product) => {
+            if (product.id === id) {
+                return { ...product, cantidad: quantity }; 
+            }
+            return product;
+        });
+
+        setCartProducts(updatedProducts);
+        calculateTotal(updatedProducts)
+
+        try {
+            const data = { cantidad: quantity};
+            await axios.put(`${URL}carritoCompras/${id}`, data); 
+            
+        } catch (error) {
+            console.error("Error al actualizar la cantidad del producto:", error);
+        }
+    }
+};
+
+  const incrementQuantity = (id) => {
+    const product = cartProducts.find((elm) => elm.id === id);
+    if (product) {
+      setQuantity(id, product.cantidad + 1);
     }
   };
-  const removeItem = (id) => {
-    setCartProducts((pre) => [...pre.filter((elm) => elm.id != id)]);
+
+  const decrementQuantity = (id) => {
+    const product = cartProducts.find((elm) => elm.id === id);
+    if (product && product.cantidad > 1) {
+      setQuantity(id, product.cantidad - 1);
+    }
   };
+
+  const removeItem = async (id) => {
+    setCartProducts((pre) => [...pre.filter((elm) => elm.id != id)]);
+    try {
+      const data = { estado: 0};
+      await axios.put(`${URL}carritoCompras/${id}`, data); 
+    } catch (error) {
+        console.error("Error al eliminar el producto:", error);
+    }
+  };
+
+  const fetchCartProducts = async () => {
+        try {
+          const response = await axios.get(`${URL}carritoCompras/`, {
+            params: {
+              id_usuario: userId
+            }
+          });
+
+          setCartProducts(response.data);
+          calculateTotal(response.data)
+    
+        } catch (error) {
+          console.error('Error al obtener los productos del carrito:', error);
+        }
+      }
+
   useEffect(() => {
-    closeCart();
-  }, [pathname]);
+    if (isTokenValid()) {
+      fetchCartProducts();
+      closeCart();
+    }else {
+      setCartProducts([]);
+      setTotalPrice(0);
+    }
+  }, [cartProducts.length]);
+  
 
   return (
     <>
@@ -54,7 +174,7 @@ export default function CartDrawer() {
               <React.Fragment key={i}>
                 <div className="cart-drawer-item d-flex position-relative">
                   <div className="position-relative">
-                    <img
+                    {/*<img
                       loading="lazy"
                       className="cart-drawer-item__img"
                       width={330}
@@ -62,17 +182,17 @@ export default function CartDrawer() {
                       style={{ height: "fit-content" }}
                       src={elm.imgSrc}
                       alt="image"
-                    />
+                    />*/}
                   </div>
                   <div className="cart-drawer-item__info flex-grow-1">
                     <h6 className="cart-drawer-item__title fw-normal">
-                      {elm.title}
+                      {elm?.producto?.nombre || "Producto sin nombre"}
                     </h6>
                     <p className="cart-drawer-item__option text-secondary">
-                      Color: Yellow
+                      {elm?.producto?.nombre || "Producto sin nombre"}
                     </p>
                     <p className="cart-drawer-item__option text-secondary">
-                      Size: L
+                      Talla: {elm?.producto?.talla?.descripcion || "Talla no disponible"}
                     </p>
                     <div className="d-flex align-items-center justify-content-between mt-1">
                       <div className="qty-control position-relative">
@@ -82,20 +202,18 @@ export default function CartDrawer() {
                           onChange={(e) =>
                             setQuantity(elm.id, e.target.value / 1)
                           }
-                          value={elm.quantity}
+                          value={elm?.cantidad || 0}
                           min="1"
                           className="qty-control__number border-0 text-center"
                         />
                         <div
-                          onClick={() => {
-                            setQuantity(elm.id, elm.quantity - 1);
-                          }}
+                          onClick={() => decrementQuantity(elm.id)} // Restar cantidad
                           className="qty-control__reduce text-start"
                         >
                           -
                         </div>
                         <div
-                          onClick={() => setQuantity(elm.id, elm.quantity + 1)}
+                          onClick={() => incrementQuantity(elm.id)} // Sumar cantidad
                           className="qty-control__increase text-end"
                         >
                           +
@@ -103,7 +221,7 @@ export default function CartDrawer() {
                       </div>
 
                       <span className="cart-drawer-item__price money price">
-                        ${elm.price * elm.quantity}
+                        ${elm?.producto?.precio ? (elm.producto.precio * elm.cantidad).toFixed(2) : "Precio no disponible"}
                       </span>
                     </div>
                   </div>
@@ -148,12 +266,12 @@ export default function CartDrawer() {
               </Link>
             </>
           ) : (
-            <Link to="/shop-1" className="btn btn-light mt-3 d-block">
+            <Link to="/shop-6" className="btn btn-light mt-3 d-block">
               Explore shop
             </Link>
           )}
         </div>
-        {/* <!-- /.aside-content --> */}
+        {/* <!-- /.aside-content --> */}  
       </div>
       <div
         id="cartDrawerOverlay"

@@ -136,17 +136,17 @@ export const blogmenuItems = [
 ];
 
 export const othersMenuItems = [
-  {
+  /* {
     id: 1,
     href: "/account_dashboard",
     title: "My Account",
-  },
+  }, */
   {
     id: 2,
     href: "/login_register",
-    title: "Login / Register",
+    title: "Logout",
   },
-  {
+  /* {
     id: 3,
     href: "/store_location",
     title: "Store Locator",
@@ -170,16 +170,16 @@ export const othersMenuItems = [
     id: 7,
     href: "/page-not-found",
     title: "404 Error",
-  },
+  }, 
   {
     id: 8,
     href: "/coming_soon",
     title: "Coming Soon",
-  },
+  },*/
 ];
 
 export const dashboardMenuItems = [
-  {
+  /* {
     id: 1,
     href: "/account_dashboard",
     title: "Dashboard",
@@ -203,7 +203,7 @@ export const dashboardMenuItems = [
     id: 5,
     href: "/account_wishlist",
     title: "Wishlist",
-  },
+  }, */
   {
     id: 6,
     href: "/login_register",

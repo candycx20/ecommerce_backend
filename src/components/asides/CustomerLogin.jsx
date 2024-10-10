@@ -1,8 +1,35 @@
 import { closeModalUserlogin } from "@/utlis/aside";
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState} from "react";
 
 export default function CustomerLogin() {
+
+  
+  const [loginSuccessful, setLoginSuccessful] = useState(false)
+
+  const handdleLogin = (e) =>{
+    e.preventDefault();
+    const data = {email: email, contrasenia: contrasenia};
+
+    fetch('http://18.218.13.130:2003/usuarios/login',{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).then(response => response.json())
+    .then(result => {
+      console.log(result.token)
+
+      if(result.token){
+        localStorage.setItem('token', result.token)
+        setLoginSuccessful(true)
+      }
+    }).catch(error =>{
+      console.log(error)
+    })
+  }
+
   useEffect(() => {
     const pageOverlay = document.getElementById("pageOverlay");
 
@@ -14,6 +41,7 @@ export default function CustomerLogin() {
   }, []);
 
   return (
+    <> {loginSuccessful ? <Home />:
     <div
       id="userAside"
       className="aside aside_right overflow-hidden customer-forms "
@@ -47,7 +75,7 @@ export default function CustomerLogin() {
                 placeholder="********"
               />
             </div>
-            <div className="d-flex align-items-center mb-3 pb-2">
+            {/* <div className="d-flex align-items-center mb-3 pb-2">
               <div className="form-check mb-0">
                 <input
                   name="remember"
@@ -62,10 +90,11 @@ export default function CustomerLogin() {
               <Link to="/reset_password" className="btn-text ms-auto">
                 Lost password?
               </Link>
-            </div>
+            </div> */}
             <button
               className="btn btn-primary w-100 text-uppercase"
               type="submit"
+              onClick={handdleLogin}
             >
               Log In
             </button>
@@ -136,5 +165,6 @@ export default function CustomerLogin() {
         </div>
       </div>
     </div>
+    } </>
   );
 }

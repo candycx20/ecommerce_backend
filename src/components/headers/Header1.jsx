@@ -5,12 +5,45 @@ import { openCart } from "@/utlis/openCart";
 import CartLength from "./components/CartLength";
 
 import User from "./components/User";
+import Login from "../otherPages/LoginRegister"
 import SearchPopup from "./components/SearchPopup";
+
+function parseJwt(token) {
+  const base64Url = token.split(".")[1];
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  const jsonPayload = decodeURIComponent(
+    window
+      .atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
 
 export default function Header1() {
   const [scrollDirection, setScrollDirection] = useState("down");
+  const [tokenValid, setTokenValid] = useState(false); // Declaramos el estado con useState
 
   useEffect(() => {
+
+    const token = localStorage.getItem("token"); // Suponiendo que guardas el token en localStorage
+    if (token) {
+      try {
+        const parsedToken = parseJwt(token);
+        const now = Date.now() / 1000;
+        if (parsedToken.exp > now) {
+          setTokenValid(true); // El token es válido
+        }
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        setTokenValid(false); // Si el token no es válido o hay un error
+      }
+    }
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
@@ -50,7 +83,7 @@ export default function Header1() {
       <div className="container">
         <div className="header-desk header-desk_type_1">
           <div className="logo">
-            <Link to="/">
+            {/* <Link to="/">
               <img
                 src="/assets/images/logo.png"
                 width={112}
@@ -58,7 +91,7 @@ export default function Header1() {
                 alt="Uomo"
                 className="logo__image d-block"
               />
-            </Link>
+            </Link> */}
           </div>
           {/* <!-- /.logo --> */}
 
@@ -75,12 +108,15 @@ export default function Header1() {
 
             {/* <!-- /.header-tools__item hover-container --> */}
 
+            {!tokenValid && (
             <div className="header-tools__item hover-container">
               <a className="header-tools__item js-open-aside" href="#">
                 <User />
               </a>
             </div>
+            )}
 
+            {/* {tokenValid && (
             <Link className="header-tools__item" to="/account_wishlist">
               <svg
                 width="20"
@@ -92,6 +128,7 @@ export default function Header1() {
                 <use href="#icon_heart" />
               </svg>
             </Link>
+            )} */}
 
             <a
               onClick={() => openCart()}

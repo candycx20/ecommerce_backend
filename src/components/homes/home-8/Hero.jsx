@@ -42,17 +42,17 @@ export default function Hero() {
                 {elm.season.toUpperCase()}
               </h6>
               <h2 className="h1 fw-normal mb-0 animate animate_fade animate_btt animate_delay-5 text-white">
-                {elm.title}
+                CANDY21
               </h2>
               <h2 className="h1 fw-bold mb-2 animate animate_fade animate_btt animate_delay-5 text-white">
                 {elm.subtitle}
               </h2>
-              <Link
+              {/* <Link
                 to="/shop-1"
                 className="btn-link btn-link_lg default-underline text-uppercase fw-medium animate animate_fade animate_btt animate_delay-7 text-white"
               >
                 Discover More
-              </Link>
+              </Link> */}
             </div>
           </div>
         </SwiperSlide>
@@ -61,12 +61,12 @@ export default function Hero() {
 
       <div className="slideshow-pagination position-right-center type2 color-white position-right-2"></div>
       {/* <!-- /.products-pagination --> */}
-      <a
+      {/* <a
         href="#footer"
         className="slideshow-scroll d-none d-xxl-block position-absolute end-0 bottom-0 text_dash text-white text-uppercase fw-medium mb-4 mb-xl-5 mx-xl-4"
       >
         Scroll
-      </a>
+      </a> */}
     </Swiper>
   );
 }

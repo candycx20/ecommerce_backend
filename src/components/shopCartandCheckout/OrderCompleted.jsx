@@ -1,11 +1,95 @@
 import { useContextElement } from "@/context/Context";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+
+const URL = "http://18.218.13.130:2003/";
 
 export default function OrderCompleted() {
-  const { cartProducts, totalPrice } = useContextElement();
+  const { cartProducts, setCartProducts } = useContextElement();
+  const [totalPrice, setTotalPrice] = useState(0);
   const [showDate, setShowDate] = useState(false);
+  const navigate = useNavigate();
+
+  const isTokenValid = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+        const now = Date.now() / 1000;
+        return jsonPayload.exp > now; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+  const getUsuario = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = JSON.parse(
+          decodeURIComponent(
+            window
+              .atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          )
+        );
+          const now = Date.now() / 1000;
+        return jsonPayload.id; 
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return false; 
+      }
+    }
+    return false; 
+  };
+
+  const userId = getUsuario();
+
+  const calculateTotal = (products) => {
+    const total = products.reduce((acc, producto) => acc + (producto.producto.precio * producto.cantidad), 0);
+    setTotalPrice(total.toFixed(2));
+  };
+
+
+  const fetchCartProducts = async () => {
+    try {
+      const response = await axios.get(`${URL}carritoCompras/`, {
+        params: {
+          id_usuario: userId,
+        },
+      });
+      setCartProducts(response.data)
+      calculateTotal(response.data)
+    } catch (error) {
+      console.error("Error al obtener los productos del carrito:", error);
+    }
+  };
+
   useEffect(() => {
+    if (isTokenValid()) {
+    fetchCartProducts();
     setShowDate(true);
+  }else{
+    navigate('/');
+  }
   }, []);
 
   return (
@@ -39,7 +123,7 @@ export default function OrderCompleted() {
         <div className="order-info__item">
           <label>Total</label>
 
-          <span>${totalPrice && totalPrice + 19}</span>
+          <span>${totalPrice}</span>
         </div>
         <div className="order-info__item">
           <label>Paymetn Method</label>
@@ -60,9 +144,9 @@ export default function OrderCompleted() {
               {cartProducts.map((elm, i) => (
                 <tr key={i}>
                   <td>
-                    {elm.title} x {elm.quantity}
+                    {elm.producto.nombre} x {elm.cantidad}
                   </td>
-                  <td>${elm.price}</td>
+                  <td>${elm.producto.precio}</td>
                 </tr>
               ))}
             </tbody>
@@ -74,16 +158,8 @@ export default function OrderCompleted() {
                 <td>${totalPrice}</td>
               </tr>
               <tr>
-                <th>SHIPPING</th>
-                <td>Free shipping</td>
-              </tr>
-              <tr>
-                <th>VAT</th>
-                <td>${totalPrice && 19}</td>
-              </tr>
-              <tr>
                 <th>TOTAL</th>
-                <td>${totalPrice && totalPrice + 19}</td>
+                <td>${totalPrice}</td>
               </tr>
             </tbody>
           </table>
