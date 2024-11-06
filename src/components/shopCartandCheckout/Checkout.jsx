@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-const URL = "http://18.218.13.130:2003/";
+const URL = "http://localhost:2003/";
 
 const countries = [
   "Australia",
@@ -14,11 +14,13 @@ const countries = [
 ];
 
 export default function Checkout() {
+  const { setOrderData } = useContextElement();
   const { cartProducts, setCartProducts } = useContextElement();
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedRegion, setSelectedRegion] = useState("");
   const [idDDActive, setIdDDActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -150,6 +152,7 @@ export default function Checkout() {
     if (!formValues.streetAddress) errors.streetAddress = "Street address is required";
     if (!formValues.phone) errors.phone = "Phone number is required";
     if (!formValues.email) errors.email = "Email is required";
+    if (!formValues.nit) errors.nit = "Nit is required";
 
     setFormErrors(errors);
 
@@ -172,15 +175,19 @@ export default function Checkout() {
   // Efecto para validar el formulario en tiempo real y habilitar o deshabilitar el botón PLACE ORDER
   useEffect(() => {
     if (isTokenValid()) {
-    fetchCartProducts();
-    fetchUser();
+      fetchCartProducts();
+      fetchUser();
+    } else {
+      setCartProducts([]);
+      setTotalPrice(0);
+      navigate('/');
+    }
+  }, []); // Ejecutar solo al cargar la página
+  
+  useEffect(() => {
     setIsFormValid(validateForm());
-  }else{
-    setCartProducts([]); 
-    setTotalPrice(0); 
-    navigate('/');
-  }
-  }, [formValues, selectedRegion]);
+  }, [formValues, selectedRegion]); // Validar el formulario solo cuando cambien los valores
+  
 
   const proceedToCheckout = () => {
     if (cartProducts.length > 0 && validateForm()) {
@@ -208,12 +215,14 @@ export default function Checkout() {
     try {
         const pedidoData = {
             subtotal: totalPrice,
-            descuento: 0, 
+            descuento: 0,
+            nit_emisor: formValues.nit,
+            nit_receptor: "111111111",
             direccion_envio: formValues.streetAddress,
             provincia_envio: formValues.province,
             codigo_postal: formValues.zipcode,
             ciudad_envio: formValues.city,
-            pais_envio: selectedRegion, 
+            pais_envio: selectedRegion,
             id_usuario: userId,
         };
 
@@ -221,18 +230,40 @@ export default function Checkout() {
         const response = await axios.post(`${URL}pedidos/`, pedidoData);
 
         if (response.status === 200) {
-            const pedidoId = response.data.id; 
-            await createDetallePedido(pedidoId);
+            const pedidoId = response.data.id;
+            const facturaId = response.data.id_factura; // Este es solo un ejemplo, reemplaza con el ID real si lo tienes
+            setOrderData({
+              pedidoId,
+              facturaId,
+              total: totalPrice,
+              paymentMethod,
+              ...pedidoData,
+            });
+
+            await createDetallePedido(pedidoId, facturaId);
             localStorage.setItem("orderId", pedidoId);
-            console.log(localStorage.setItem("orderId"))
             updateCart();
+        } else {
+            alert(response.data.message);
         }
     } catch (error) {
-        console.error("Error al crear el pedido", error);
+        // Aquí manejas el error y puedes mostrar un mensaje adecuado
+        if (error.response) {
+             console.error("Error en la respuesta del servidor:", error.response.data);
+            console.error("Código de estado:", error.response.status);
+            alert(error.response.data.message || "Hubo un error al crear el pedido. Verifique los datos proporcionados.");
+        } else if (error.request) {
+            console.error("Error en la solicitud: No se recibió respuesta del servidor", error.request);
+            alert("No se recibió respuesta del servidor. Por favor, inténtelo de nuevo más tarde.");
+        } else {
+            console.error("Error al configurar la solicitud:", error.message);
+            alert("Hubo un error al configurar la solicitud. Por favor, inténtelo de nuevo.");
+        }
     }
 };
 
-const createDetallePedido = async (pedidoId) => {
+
+const createDetallePedido = async (pedidoId, facturaId) => {
   try {
       const detallePromises = cartProducts.map(async (producto) => {
           const detalleData = {
@@ -240,8 +271,14 @@ const createDetallePedido = async (pedidoId) => {
               precio: producto.producto.precio,
               id_producto: producto.producto.id, 
               id_pedido: pedidoId, 
+              nombre: producto.producto.nombre,
+              descripcion: producto.producto.descripcion,
+              tipo_item: "Bien",
+              descuento: 0,
+              otros_descuento: 0, 
+              id_factura: facturaId
           };
-          console.log(detalleData)
+          console.log(producto.producto.descripcion)
 
           await axios.post(`${URL}detallePedidos/`, detalleData);
       });
@@ -269,6 +306,9 @@ const updateCart = async () => {
   }
 };
 
+const handlePaymentMethodChange = (e) => {
+  setPaymentMethod(e.target.value);
+};
 
   return (
     <form onSubmit={(e) => e.preventDefault()}>
@@ -315,13 +355,16 @@ const updateCart = async () => {
                 <input
                   type="text"
                   className="form-control"
-                  id="companyName"
-                  placeholder="Company Name (optional)"
-                  value={formValues.companyName}
+                  id="nit"
+                  placeholder="Nit (optional)"
+                  value={formValues.nit}
                   onChange={handleInputChange}
-                  onBlur={handleFieldBlur}  // Marca como "tocado"
+                  onBlur={handleFieldBlur} 
                 />
-                <label htmlFor="companyName">Nit (optional)</label>
+                <label htmlFor="nit">Nit</label>
+                {touchedFields.nit && formErrors.nit && (
+                  <p className="text-danger">{formErrors.nit}</p>
+                )}
               </div>
             </div>
             <div className="col-md-12">
@@ -531,35 +574,84 @@ const updateCart = async () => {
               </table>
             </div>
             <div className="checkout__payment-methods">
-              <div className="form-check">
-                <input
-                  className="form-check-input form-check-input_fill"
-                  type="radio"
-                  name="checkout_payment_method"
-                  id="checkout_payment_method_3"
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="checkout_payment_method_3"
-                >
-                  Cash on delivery
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input form-check-input_fill"
-                  type="radio"
-                  name="checkout_payment_method"
-                  id="checkout_payment_method_4"
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="checkout_payment_method_4"
-                >
-                  Paypal
-                </label>
-              </div>
+            {/* Método de pago: Contra entrega */}
+            <div className="form-check">
+              <input
+                className="form-check-input form-check-input_fill"
+                type="radio"
+                name="checkout_payment_method"
+                id="checkout_payment_method_3"
+                value="Cash"
+                onChange={handlePaymentMethodChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="checkout_payment_method_3"
+              >
+                Cash on delivery
+              </label>
             </div>
+
+            {/* Método de pago: Tarjeta */}
+            <div className="form-check">
+              <input
+                className="form-check-input form-check-input_fill"
+                type="radio"
+                name="checkout_payment_method"
+                id="checkout_payment_method_4"
+                value="Card"
+                onChange={handlePaymentMethodChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="checkout_payment_method_4"
+              >
+                Tarjeta
+              </label>
+            </div>
+
+            {/* Campos adicionales que se muestran solo si se selecciona "Tarjeta" */}
+            {paymentMethod === 'card' && (
+              <div className="card-details">
+                <div className="form-group">
+                  <label htmlFor="cardNumber">Número de tarjeta</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="cardNumber"
+                    placeholder="Introduce el número de la tarjeta"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="cardName">Nombre en la tarjeta</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="cardName"
+                    placeholder="Nombre del titular"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="expiryDate">Fecha de expiración</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="expiryDate"
+                    placeholder="MM/AA"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="cvv">CVV</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="cvv"
+                    placeholder="CVV"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
             <div>
               <button className="btn btn-primary btn-checkout mb-2"
                 onClick={shoppingBag}>

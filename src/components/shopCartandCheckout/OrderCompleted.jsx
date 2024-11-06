@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-const URL = "http://18.218.13.130:2003/";
+const URL = "http://localhost:2003/";
 
 export default function OrderCompleted() {
+  const { orderData} = useContextElement();
   const { cartProducts, setCartProducts } = useContextElement();
   const [totalPrice, setTotalPrice] = useState(0);
   const [showDate, setShowDate] = useState(false);
@@ -114,7 +115,7 @@ export default function OrderCompleted() {
       <div className="order-info">
         <div className="order-info__item">
           <label>Order Number</label>
-          <span>13119</span>
+          <span>{orderData?.pedidoId || "N/A"}</span>
         </div>
         <div className="order-info__item">
           <label>Date</label>
@@ -123,11 +124,11 @@ export default function OrderCompleted() {
         <div className="order-info__item">
           <label>Total</label>
 
-          <span>${totalPrice}</span>
+          <span>${orderData?.total || totalPrice}</span>
         </div>
         <div className="order-info__item">
           <label>Paymetn Method</label>
-          <span>Direct Bank Transfer</span>
+          <span>{orderData?.paymentMethod || "N/A"}</span>
         </div>
       </div>
       <div className="checkout__totals-wrapper">

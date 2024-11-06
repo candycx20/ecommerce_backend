@@ -1,4 +1,3 @@
-import Star from "@/components/common/Star";
 import { products59 } from "@/data/products/fashion";
 
 import { Link } from "react-router-dom";
