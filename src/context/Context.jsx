@@ -15,13 +15,11 @@ export default function Context({ children }) {
   const [totalPrice, setTotalPrice] = useState(0);
 
   const [orderData, setOrderData] = useState(null);
+  
+  const [factura, setFactura] = useState(null);
+  const [items, setItems] = useState(null);
 
-  useEffect(() => {
-    const subtotal = cartProducts.reduce((accumulator, product) => {
-      return accumulator + product.quantity * product.price;
-    }, 0);
-    setTotalPrice(subtotal);
-  }, [cartProducts]);
+
 
   const addProductToCart = (id) => {
     if (!cartProducts.filter((elm) => elm.id == id)[0]) {
@@ -82,6 +80,7 @@ export default function Context({ children }) {
     cartProducts,
     setCartProducts,
     totalPrice,
+    setTotalPrice,
     addProductToCart,
     isAddedToCartProducts,
     toggleWishlist,
@@ -91,6 +90,10 @@ export default function Context({ children }) {
     setQuickViewItem,
     orderData,
     setOrderData, 
+    factura,
+    setFactura,
+    items,
+    setItems
   };
   return (
     <dataContext.Provider value={contextElement}>

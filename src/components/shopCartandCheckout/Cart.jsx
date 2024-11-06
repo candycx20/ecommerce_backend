@@ -8,7 +8,7 @@ const URL = "http://backend.candy21.icu/";
 export default function Cart() {
   const navigate = useNavigate();
   const { cartProducts, setCartProducts } = useContextElement();
-  const [totalPrice, setTotalPrice] = useState(0);
+  const {totalPrice, setTotalPrice} = useContextElement();
   
   const isTokenValid = () => {
     const token = localStorage.getItem("token");

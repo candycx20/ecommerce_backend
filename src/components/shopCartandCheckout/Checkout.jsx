@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
-const URL = "http://localhost:2003/";
+const URL = "http://backend.candy21.icu/";
 
 const countries = [
   "Australia",
@@ -16,7 +16,9 @@ const countries = [
 export default function Checkout() {
   const { setOrderData } = useContextElement();
   const { cartProducts, setCartProducts } = useContextElement();
-  const [totalPrice, setTotalPrice] = useState(0);
+  const {totalPrice, setTotalPrice} = useContextElement();
+  const { setFactura} = useContextElement();
+  const { setItems} = useContextElement();
   const [selectedRegion, setSelectedRegion] = useState("");
   const [idDDActive, setIdDDActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,10 +99,10 @@ export default function Checkout() {
 
   const userId = getUsuario();
 
-  const calculateTotal = (products) => {
-    const total = products.reduce((acc, producto) => acc + (producto.producto.precio * producto.cantidad), 0);
-    setTotalPrice(total.toFixed(2));
-  };
+  // const calculateTotal = (products) => {
+  //   const total = products.reduce((acc, producto) => acc + (producto.producto.precio * producto.cantidad), 0);
+  //   setTotalPrice(total.toFixed(2));
+  // };
 
   const fetchUser = async () => {
     try {
@@ -109,8 +111,7 @@ export default function Checkout() {
       
       // Actualiza el estado 'user'
       setUser({ firstName: nombre, lastName: apellido, phone: telefono, email });
-  
-      // Actualiza también los 'formValues' con los datos del usuario
+
       setFormValues((prevValues) => ({
         ...prevValues,
         firstName: nombre,
@@ -140,7 +141,7 @@ export default function Checkout() {
     }
   };
 
-  // Validar los campos obligatorios
+
   const validateForm = () => {
     const errors = {};
     if (!formValues.firstName) errors.firstName = "First name is required";
@@ -156,23 +157,23 @@ export default function Checkout() {
 
     setFormErrors(errors);
 
-    // Si no hay errores, el formulario es válido
+ 
     return Object.keys(errors).length === 0;
   };
 
-  // Manejar el cambio de valores en los campos del formulario
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormValues({ ...formValues, [id]: value });
   };
 
-  // Marcar los campos como tocados cuando el usuario interactúa con ellos
+
   const handleFieldBlur = (e) => {
     const { id } = e.target;
     setTouchedFields({ ...touchedFields, [id]: true });
   };
 
-  // Efecto para validar el formulario en tiempo real y habilitar o deshabilitar el botón PLACE ORDER
+ 
   useEffect(() => {
     if (isTokenValid()) {
       fetchCartProducts();
@@ -182,16 +183,17 @@ export default function Checkout() {
       setTotalPrice(0);
       navigate('/');
     }
-  }, []); // Ejecutar solo al cargar la página
+  }, []); 
   
   useEffect(() => {
     setIsFormValid(validateForm());
-  }, [formValues, selectedRegion]); // Validar el formulario solo cuando cambien los valores
+  }, [formValues, selectedRegion]); 
   
 
   const proceedToCheckout = () => {
     if (cartProducts.length > 0 && validateForm()) {
       createPedido();
+      setTotalPrice(0);
     } else {
       setTouchedFields({
         firstName: true,
@@ -226,12 +228,12 @@ export default function Checkout() {
             id_usuario: userId,
         };
 
-        // Crear el pedido y obtener el id del pedido
+
         const response = await axios.post(`${URL}pedidos/`, pedidoData);
 
         if (response.status === 200) {
             const pedidoId = response.data.id;
-            const facturaId = response.data.id_factura; // Este es solo un ejemplo, reemplaza con el ID real si lo tienes
+            const facturaId = response.data.id_factura; 
             setOrderData({
               pedidoId,
               facturaId,
@@ -239,15 +241,14 @@ export default function Checkout() {
               paymentMethod,
               ...pedidoData,
             });
-
+            const facturaData = response.data.factura;
+            setFactura(facturaData)
             await createDetallePedido(pedidoId, facturaId);
-            localStorage.setItem("orderId", pedidoId);
             updateCart();
         } else {
             alert(response.data.message);
         }
     } catch (error) {
-        // Aquí manejas el error y puedes mostrar un mensaje adecuado
         if (error.response) {
              console.error("Error en la respuesta del servidor:", error.response.data);
             console.error("Código de estado:", error.response.status);
@@ -265,6 +266,7 @@ export default function Checkout() {
 
 const createDetallePedido = async (pedidoId, facturaId) => {
   try {
+     const allItemsData = [];
       const detallePromises = cartProducts.map(async (producto) => {
           const detalleData = {
               cantidad: producto.cantidad,
@@ -278,11 +280,14 @@ const createDetallePedido = async (pedidoId, facturaId) => {
               otros_descuento: 0, 
               id_factura: facturaId
           };
-          console.log(producto.producto.descripcion)
 
-          await axios.post(`${URL}detallePedidos/`, detalleData);
+          const response = await axios.post(`${URL}detallePedidos/`, detalleData);
+          
+          allItemsData.push(response.data.item);
       });
       await Promise.all(detallePromises);
+      setItems(allItemsData);
+      console.log(allItemsData)
   } catch (error) {
       console.error("Error al crear los detalles del pedido", error);
   }

@@ -8,7 +8,7 @@ const URL = "http://backend.candy21.icu/";
 
 export default function CartDrawer() {
   const { cartProducts, setCartProducts } = useContextElement();
-  const [totalPrice, setTotalPrice] = useState(0);
+  const {totalPrice, setTotalPrice} = useContextElement();
   const { pathname } = useLocation();
 
   const closeCart = () => {
@@ -75,6 +75,7 @@ export default function CartDrawer() {
         params: { id_usuario: userId },
       });
       setCartProducts(response.data);
+      console.log(response.data)
       calculateTotal(response.data);
     } catch (error) {
       console.error("Error al obtener los productos del carrito:", error);

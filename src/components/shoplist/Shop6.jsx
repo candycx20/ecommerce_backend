@@ -52,6 +52,7 @@ export default function Shop6() {
         .then(() => {
           addProductToCart(productId);
           setCartProductIds((prevIds) => [...prevIds, productId]);
+          window.location.reload();
         })
         .catch((error) => console.error('Error al agregar el producto al carrito:', error));
     }
