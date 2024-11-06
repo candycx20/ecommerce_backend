@@ -13,6 +13,9 @@ export default function Context({ children }) {
   const [wishList, setWishList] = useState([]);
   const [quickViewItem, setQuickViewItem] = useState(allProducts[0]);
   const [totalPrice, setTotalPrice] = useState(0);
+
+  const [orderData, setOrderData] = useState(null);
+
   useEffect(() => {
     const subtotal = cartProducts.reduce((accumulator, product) => {
       return accumulator + product.quantity * product.price;
@@ -86,6 +89,8 @@ export default function Context({ children }) {
     quickViewItem,
     wishList,
     setQuickViewItem,
+    orderData,
+    setOrderData, 
   };
   return (
     <dataContext.Provider value={contextElement}>

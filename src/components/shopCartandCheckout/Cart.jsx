@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-const URL = "http://18.218.13.130:2003/";
+const URL = "http://backend.candy21.icu/";
 
 export default function Cart() {
   const navigate = useNavigate();
